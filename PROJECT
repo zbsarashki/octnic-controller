@@ -1,0 +1,16 @@
+domain: github.com
+layout:
+- go.kubebuilder.io/v3
+projectName: octnicupdater
+repo: github.com/zbsarashk/OctNic
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: github.com
+  group: acclr
+  kind: OctNicUpdater
+  path: github.com/zbsarashk/OctNic/api/v1beta1
+  version: v1beta1
+version: "3"

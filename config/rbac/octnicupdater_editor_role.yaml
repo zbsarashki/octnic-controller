@@ -1,0 +1,31 @@
+# permissions for end users to edit octnicupdaters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: octnicupdater-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: octnicupdater
+    app.kubernetes.io/part-of: octnicupdater
+    app.kubernetes.io/managed-by: kustomize
+  name: octnicupdater-editor-role
+rules:
+- apiGroups:
+  - acclr.github.com
+  resources:
+  - octnicupdaters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - acclr.github.com
+  resources:
+  - octnicupdaters/status
+  verbs:
+  - get

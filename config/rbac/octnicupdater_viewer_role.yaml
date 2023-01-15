@@ -1,0 +1,27 @@
+# permissions for end users to view octnicupdaters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: octnicupdater-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: octnicupdater
+    app.kubernetes.io/part-of: octnicupdater
+    app.kubernetes.io/managed-by: kustomize
+  name: octnicupdater-viewer-role
+rules:
+- apiGroups:
+  - acclr.github.com
+  resources:
+  - octnicupdaters
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - acclr.github.com
+  resources:
+  - octnicupdaters/status
+  verbs:
+  - get

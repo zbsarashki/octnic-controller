@@ -1,0 +1,12 @@
+apiVersion: acclr.github.com/v1beta1
+kind: OctNicUpdater
+metadata:
+  labels:
+    app.kubernetes.io/name: octnicupdater
+    app.kubernetes.io/instance: octnicupdater-sample
+    app.kubernetes.io/part-of: octnicupdater
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: octnicupdater
+  name: octnicupdater-sample
+spec:
+  # TODO(user): Add fields here
