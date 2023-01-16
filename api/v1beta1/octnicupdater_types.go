@@ -34,6 +34,7 @@ type OctNicUpdaterSpec struct {
 	NodeName  string `json:"nodename,omitempty"`
 	// Device configuration
 	PciAddr   string `json:"pciAddr,omitempty"`
+	NumVfs string `json:"numvfs,omitempty"`
 	/* 
 	Pass resource names and their mappings through CRD
 	Syntax:
@@ -43,7 +44,7 @@ type OctNicUpdaterSpec struct {
 	  - "marvell_sriov_net_dip#20-21"
 	  - "marvell_sriov_net_dpp#32,36-37,40-47"
 	*/
-	ResourceName [] string `json:"resourceName,omitempty"`
+	ResourceName []string `json:"resourceName,omitempty"`
 	ResourcePrefix  string `json:"resourcePrefix,omitempty"`
 	// To be removed once support for checking OS,and FW versions is added
 	// to the tools image. In the absence of support from the tools image

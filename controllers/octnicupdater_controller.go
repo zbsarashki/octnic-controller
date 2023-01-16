@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"regexp"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -81,7 +82,6 @@ func (r *OctNicUpdaterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			driverSet)
 	if errors.IsNotFound(err) {
 		/* Start daemonSet */
-		fmt.Printf("err %s\n", err)
 		p := appsv1.DaemonSet{}
 		byf, err := ioutil.ReadFile("/manifests/drv-daemon/" +
 				mctx.Spec.Acclr + "-drv.yaml")
@@ -111,8 +111,6 @@ func (r *OctNicUpdaterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 			Name: mctx.Spec.Acclr + "-sriovdp", Namespace: mctx.Namespace},
 			driverSet)
 	if errors.IsNotFound(err) {
-		/* Start daemonSet */
-		fmt.Printf("err %s\n", err)
 		p := appsv1.DaemonSet{}
 		byf, err := ioutil.ReadFile("/manifests/dev-plugin/" + 
 				mctx.Spec.Acclr + "-sriovdp.yaml")
@@ -163,6 +161,24 @@ func (r *OctNicUpdaterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 				byf = reg.ReplaceAll(byf, []byte("nodeName: "+s.Spec.NodeName))
 				reg, _ = regexp.Compile(`NAME_FILLED_BY_OPERATOR`)
 				byf = reg.ReplaceAll(byf, []byte(s.Spec.NodeName))
+				/* Device Configuration */
+				/*
+				*/
+				fmt.Printf("++++++++++++++++++++\n")
+				fmt.Printf("numvfs: %s\n", mctx.Spec.NumVfs)
+				fmt.Printf("pciAddr: %s\n", mctx.Spec.PciAddr)
+				fmt.Printf("prefix: %s\n", mctx.Spec.ResourcePrefix)
+				fmt.Printf("prefix: %s\n", strings.Join(mctx.Spec.ResourceName[:],","))
+				fmt.Printf("--------------------\n")
+				reg, _ = regexp.Compile(`value: NUMVFS_FILLED_BY_OPERATOR`)
+				byf = reg.ReplaceAll(byf, []byte("value: "+mctx.Spec.NumVfs))
+				reg, _ = regexp.Compile(`value: PCIADDR_FILLED_BY_OPERATOR`)
+				byf = reg.ReplaceAll(byf, []byte("value: "+mctx.Spec.PciAddr))
+				reg, _ = regexp.Compile(`value: PREFIX_FILLED_BY_OPERATOR`)
+				byf = reg.ReplaceAll(byf, []byte("value: "+mctx.Spec.ResourcePrefix))
+				reg, _ = regexp.Compile(`value: RESOURCENAMES_FILLED_BY_OPERATOR`)
+				byf = reg.ReplaceAll(byf, []byte("value: "+
+					strings.Join(mctx.Spec.ResourceName[:],",")))
 
 				yamlutil.Unmarshal(byf, &p)
 				err = ctrl.SetControllerReference(mctx, &p, r.Scheme)
