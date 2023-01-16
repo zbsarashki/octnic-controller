@@ -1,0 +1,12 @@
+octnicupdater:
+  enabled: true
+  #repository: docker.io
+  #image: centos/tools
+  #version: latest
+  repository: registry.local:9001
+  image: staging/octnicupdater
+  version: 0.0.1
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: ["local-registry"]
+  priorityClassName: system-node-critical
+  defaultRuntime: containerd

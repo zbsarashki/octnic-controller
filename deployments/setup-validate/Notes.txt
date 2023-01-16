@@ -1,0 +1,44 @@
+docker create --name vtools --net host -t debian:bullseye
+docker start vtools
+docker cp config_crd_to_json_v1.sh vtools:/
+docker exec vtools apt-get update
+docker exec vtools apt-get install -y bash
+docker exec vtools chmod 755 config_crd_to_json_v1.sh
+docker commit  vtools registry.local:9001/staging/f950-setup-validate:legacy-rt
+docker push registry.local:9001/staging/f950-setup-validate:legacy-rt
+
+Where:
+
+/config_crd_to_json_v1.sh
+
+- Configures sriov
+- assigns drivers vfio or octeon_vf.
+- produces config.json for consumption by dP
+- returns 0 on success and -1 if vfs were not created 
+	TODO: This should read otherwise.
+		  i.e. driver doesn't exist or is not loaded
+
+Sample config.json produced by the script:
+
+# echo $dp_resourceName
+marvell_sriov_net_vamp#0-3,vfio-pci,marvell_sriov_net_rmp#4,5-6,Octeon_vf
+
+# cat /var/run/octnic/config.json
+{
+  "resourceList": [{
+    "resourceName": "marvell_sriov_net_vamp",
+    "resourcePrefix": "marvell.com",
+    "selectors": {
+        "rootDevices": ["0000:af:00.0#0-3"]
+     }
+   },{
+    "resourceName": "marvell_sriov_net_rmp",
+    "resourcePrefix": "marvell.com",
+    "selectors": {
+        "rootDevices": ["0000:af:00.0#4,5-6"]
+     }
+   }
+ ]
+}
+
+#

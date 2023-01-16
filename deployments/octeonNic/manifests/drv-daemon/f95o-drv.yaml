@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: f95o-driver
+  #namespace: kube-system
+  #namespace: tbcntrl-system
+  namespace: default
+  labels:
+    tier: node
+    app: "f95o-driver"
+spec:
+  selector:
+    matchLabels:
+      tier: node
+      app: "f95o-driver"
+  template:
+    metadata:
+      labels:
+        name: "f95o-driver"
+        tier: node
+        app: "f95o-driver"
+        inline_mrvl_acclr_driver_ready: "false"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: marvell.com/inline_acclr_present
+                operator: In
+                values:
+                - "true"
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      imagePullSecrets:
+        - name: local-registry
+      priorityClassName: system-node-critical
+      containers:
+      - name: f95o-driver-ctr
+        image: registry.local:9001/staging/f95o:legacy-rt
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - "rmmod"
+              - "oct_vf_nic"
+              - "octeon_vf_drv"
+              - "octnic"
+              - "octeon_drv"
+        securityContext:
+          privileged: true
+        command: ["/bin/sh"]
+        args:
+        - "-c"
+        - "--"
+        - >
+          modprobe vfio-pci;
+          insmod modules/octeon_drv.ko sdp_packet_mode=loop;
+          insmod modules/octnic.ko;
+          insmod modules/octeon_vf_drv.ko;
+          insmmod modules/oct_vf_nic.ko;
+          sleep infinity;
+
+        volumeMounts:
+        - name: class-dev
+          mountPath: /sys/dev
+          readOnly: false
+        - name: class-devices
+          mountPath: /sys/devices
+          readOnly: false
+        - name: class-bus
+          mountPath: /sys/bus
+          readOnly: false
+      volumes:
+      - name: class-dev
+        hostPath:
+          path: /sys/dev
+      - name: class-devices
+        hostPath:
+          path: /sys/devices
+      - name: class-bus
+        hostPath:
+          path: /sys/bus
+
+# Notes:
+# wget http://pkg-repo-dep/2112/marvell/modules.tar.gz
+# insmod octeon_drv.ko num_vfs=1 sdp_packet_mode=loop
+# insmod octnic.ko
+# insmod octeon_vf_drv.ko

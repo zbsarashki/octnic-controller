@@ -1,0 +1,78 @@
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.10.0
+  creationTimestamp: null
+  name: octnicupdaters.acclr.github.com
+spec:
+  group: acclr.github.com
+  names:
+    kind: OctNicUpdater
+    listKind: OctNicUpdaterList
+    plural: octnicupdaters
+    singular: octnicupdater
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: OctNicUpdater is the Schema for the octnicupdaters API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OctNicUpdaterSpec defines the desired state of OctNicUpdater
+            properties:
+              acclr:
+                type: string
+              fwimage:
+                type: string
+              nodename:
+                type: string
+              numvfs:
+                type: string
+              operation:
+                description: 'To be removed once support for checking OS,and FW versions is added to the tools image. In the absence of support from the tools image for checking the required runtime versions on the device, the Operation field in the CRD can be used to request device Update. In this case, a URL passed to the operator at helm install time, will be passed to the tools image. The tools image will download and apply any and all update images ($URL/$OSImage, $URL/$FWImage) that it finds at URL. Upon completion of the update (The update pod''s state is completed), the CRD Field Operation will be modified by the Operator, and changed to Run. The values the Operation field takes are: RUN, MAINTENANCE.'
+                type: string
+              osimage:
+                type: string
+              pciAddr:
+                description: Device configuration
+                type: string
+              resourceName:
+                description: 'Pass resource names and their mappings through CRD Syntax: resourcename: - "marvell_sriov_net_vamp#0" - "marvell_sriov_net_rmp#8-15" - "marvell_sriov_net_dip#20-21" - "marvell_sriov_net_dpp#32,36-37,40-47"'
+                items:
+                  type: string
+                type: array
+              resourcePrefix:
+                type: string
+            type: object
+          status:
+            description: OctNicUpdaterStatus defines the observed state of OctNicUpdater
+            properties:
+              octnic:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state of cluster Important: Run "make" to regenerate code after modifying this file'
+                items:
+                  properties:
+                    opstate:
+                      type: string
+                    osversion:
+                      type: string
+                    pciAddr:
+                      type: string
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

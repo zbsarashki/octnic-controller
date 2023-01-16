@@ -1,0 +1,46 @@
+docker create --name btools \
+-v /usr/lib/linux-rt-kbuild-5.10:/usr/lib/linux-rt-kbuild-5.10 \
+-v /usr/src/linux-rt-headers-5.10.0-6-rt-common:/usr/src/linux-rt-headers-5.10.0-6-rt-common \
+-v /usr/src/linux-rt-headers-5.10.0-6-rt-amd64:/usr/src/linux-rt-headers-5.10.0-6-rt-amd64 \
+-v /lib/modules:/lib/modules \
+-v $PWD/work:/work \
+--net host -t debian:bullseye
+
+docker start btools
+docker cp archives btools:/
+docker exec -it btools bash
+apt-get update
+apt-get install build-essential wget curl vim unzip libelf1 libssl1.1 linux-compiler-gcc-10-x86 bc kmod
+
+#unzip wrstudio-developer-release_wrstudio-cloud-platform-2212_WRCP-2212.zip
+#dpkg -i \
+#linux-rt-headers-5.10.0-6-rt-common_5.10.152-1.stx.29_all.deb \
+#linux-rt-headers-5.10.0-6-rt-amd64_5.10.152-1.stx.29_amd64.deb \
+#linux-rt-kbuild-5.10_5.10.152-1.stx.29_amd64.deb
+
+tar -xvjpf generic_extension-pcie-ep-generic-SDK11.22.11.tar.bz2 \
+  extensions-sources-pcie_ep_octeontx-SDK11.22.11/pcie_ep_octeontx/sources-pcie_ep_octeontx-SDK11.22.11.tar.bz2
+
+tar -xvjpf extensions-sources-pcie_ep_octeontx-SDK11.22.11/pcie_ep_octeontx/sources-pcie_ep_octeontx-SDK11.22.11.tar.bz2
+
+cd /archives/pcie_ep_octeontx-SDK11.22.11/host
+make
+make COMPILEFOR=OCTEON_VF
+
+for f in $(find ./ -type f -name '*\.ko'); do cp $f /modules/$(basename $f); done
+exit
+docker cp btools:/modules .
+
+docker stop btools
+docker rm btools
+docker rmi -f debian:bullseye
+
+# Now repackage modules into busybox image for space
+
+docker create --name f95oD --net host -t busybox:latest 
+docker cp modules f95oD:/
+docker exec -it f95oD apt-get update
+docker exec -it f95oD apt-get install -y kmod
+docker stop f95oD
+docker commit f95oD registry.local:9001/staging/f95o:legacy-rt
+docker push registry.local:9001/staging/f95o:legacy-rt

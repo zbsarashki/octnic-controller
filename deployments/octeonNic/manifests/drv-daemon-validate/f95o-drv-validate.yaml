@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: f95o-drv-validate-NAME_FILLED_BY_OPERATOR
+  namespace: default
+  labels:
+    app: "f95o-drv-validate"
+spec:
+  nodeName: FILLED_BY_OPERATOR
+  restartPolicy: Never
+  imagePullSecrets:
+  - name: local-registry
+  containers:
+  - name: f95o-drv-validate-ctr
+    image: registry.local:9001/staging/f950-setup-validate:legacy-rt
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      privileged: true
+    command: [ "/config_crd_to_json_v1.sh" ]
+    args:
+    - $device_pciAddr
+    - $dp_resourceName
+    #command: [ "/bin/bash" ]
+    #args:
+    #- "-c"
+    #- "--"
+    #- >
+       #sleep infinity;
+       #rm -f /var/run/octnic/$(echo $device_pciAddr | tr ":" "_")-config.json;
+       #[ $numvfs != "0" ] &&  echo 0 > /sys/bus/pci/devices/$device_pciAddr/sriov_numvfs;
+       #[ $numvfs != "0" ] && echo $numvfs > /sys/bus/pci/devices/$device_pciAddr/sriov_numvfs;
+       # /config_crd_to_json_v1.sh $device_pciAddr $dp_resourceName;
+       #mv config.json /var/run/octnic/$(echo $device_pciAddr | tr ":" "_")-config.json;
+       #[ $(ls -1 /sys/bus/pci/devices/$device_pciAddr | grep virtfn | wc -l) -eq $numvfs ] && exit 0;
+       #exit -1;
+    env:
+    - name: numvfs
+      value: NUMVFS_FILLED_BY_OPERATOR
+    - name: device_pciAddr
+      value: PCIADDR_FILLED_BY_OPERATOR
+    - name: dp_resourcePrefix
+      value: PREFIX_FILLED_BY_OPERATOR
+    - name: dp_resourceName
+      value: RESOURCENAMES_FILLED_BY_OPERATOR
+       # marvell_sriov_net_vamp#0,marvell_sriov_net_rmp#8-15,marvell_sriov_net_dip#20-21,marvell_sriov_dpdk_dpp#32,36-37,40-47
+       # marvell_sriov_net_vamp#0-3,vfio-pci,marvell_sriov_net_rmp#4,5-6,Octeon_vf
+    volumeMounts:
+    - name: varunfs
+      mountPath: /var/run/octnic/
+      readOnly: false
+    - name: class-dev
+      mountPath: /sys/dev
+      readOnly: false
+    - name: class-devices
+      mountPath: /sys/devices
+      readOnly: false
+    - name: class-bus
+      mountPath: /sys/bus
+      readOnly: false
+  volumes:
+  - name: varunfs
+    hostPath:
+      path: /var/run/octnic
+  - name: class-dev
+    hostPath:
+      path: /sys/dev
+  - name: class-devices
+    hostPath:
+      path: /sys/devices
+  - name: class-bus
+    hostPath:
+      path: /sys/bus

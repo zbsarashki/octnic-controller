@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: f95o-dev-update-NAME_FILLED_BY_OPERATOR
+  namespace: default
+  labels:
+    app: "f95o-dev-update"
+spec:
+  nodeName: FILLED_BY_OPERATOR
+  restartPolicy: Never
+  containers:
+  - name: f95o-drv-validate-ctr
+    image: docker.io/marvellocteon/docker_base:latest
+    imagePullPolicy: IfNotPresent
+    securityContext:
+      privileged: true
+    command: [ "/bin/bash" ]
+    args:
+    - "-c"
+    - "--"
+    - >
+       sleep 30;
+       /mrvl-remote-reset;
+       echo "F0950_UPDATE_ISSUED";
+       exit 0;
+
+# TODO: driver and device validaton
+
+    volumeMounts:
+    - name: dev-mem0
+      mountPath: /dev/mem
+      readOnly: false
+    - name: class-dev
+      mountPath: /sys/dev
+      readOnly: false
+    - name: class-devices
+      mountPath: /sys/devices
+      readOnly: false
+    - name: class-bus
+      mountPath: /sys/bus
+      readOnly: false
+  volumes:
+  - hostPath:
+      path: "/dev/mem"
+    name: dev-mem0
+  - name: class-dev
+    hostPath:
+      path: /sys/dev
+  - name: class-devices
+    hostPath:
+      path: /sys/devices
+  - name: class-bus
+    hostPath:
+      path: /sys/bus

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assets-configmap
+data:
+{{- range $path, $_ := .Files.Glob "manifests/dev-plugin/*" }}
+{{ printf "%s" (base $path) | indent 2 }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+
+{{- range $path, $_ := .Files.Glob "manifests/drv-daemon/*" }}
+{{ printf "%s" (base $path) | indent 2 }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+
+{{- range $path, $_ := .Files.Glob "manifests/drv-daemon-validate/*" }}
+{{ printf "%s" (base $path) | indent 2 }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+
+{{- range $path, $_ := .Files.Glob "manifests/dev-update/*" }}
+{{ printf "%s" (base $path) | indent 2 }}: |-
+{{ $.Files.Get $path | indent 4 }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: f95o-sriovdp-config
+data:
+  config.json: |
+    {
+      "resourceList": [{
+                "resourceName": "marvell_sriov_dpdk",
+                "resourcePrefix": "marvell.com",
+                "selectors": {
+                    "vendors": ["177d"],
+                    "devices": ["b603"],
+                    "drivers": ["vfio-pci"]
+               }
+             },{
+                "resourceName": "marvell_sriov_net",
+                "resourcePrefix": "marvell.com",
+                "selectors": {
+                    "vendors": ["177d"],
+                    "devices": ["b603"],
+                    "drivers": ["Octeon_vf"]
+               }
+             }
+       ]
+    }

@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: f95o-sriovdp
+  #namespace: kube-system
+  #namespace: tbcntrl-system
+  namespace: default
+  labels:
+    tier: node
+    app: f95o-sriovdp
+spec:
+  selector:
+    matchLabels:
+      name: f95o-sriovdp
+  template:
+    metadata:
+      labels:
+        name: f95o-sriovdp
+        tier: node
+        app: f95o-sriovdp
+    spec:
+      affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: marvell.com/inline_acclr_present
+                  operator: In
+                  values:
+                  - "true"
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: inline_mrvl_acclr_driver_ready
+                  operator: In
+                  values:
+                  - "true"
+              topologyKey: kubernetes.io/hostname
+      hostNetwork: true
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      serviceAccountName: f95o-sriov-device-plugin
+      imagePullSecrets:
+        - name: local-registry
+      containers:
+      - name: f95o-sriovdp-ctr
+        image: registry.local:9001/ghcr.io/k8snetworkplumbingwg/sriov-network-device-plugin:v3.5.1
+        imagePullPolicy: IfNotPresent
+        #command: ["/bin/sh"]
+        #args:
+        #- "-c"
+        #- "--"
+        #- >
+        #  sleep infinity;
+        args:
+        - --log-dir=sriovdp
+        - --log-level=10
+        securityContext:
+          privileged: true
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "40Mi"
+          limits:
+            cpu: 1
+            memory: "200Mi"
+        volumeMounts:
+        - name: devicesock
+          mountPath: /var/lib/kubelet/
+          readOnly: false
+        - name: log
+          mountPath: /var/log
+        - name: device-info
+          mountPath: /var/run/k8s.cni.cncf.io/devinfo/dp
+        - name: config-json
+          mountPath: /etc/pcidp/
+      
+      volumes:
+        - name: devicesock
+          hostPath:
+            path: /var/lib/kubelet/
+        - name: log
+          hostPath:
+            path: /var/log
+        - name: device-info
+          hostPath:
+            path: /var/run/k8s.cni.cncf.io/devinfo/dp
+            type: DirectoryOrCreate
+        - name: config-json
+          hostPath:
+            path: /var/run/octnic/

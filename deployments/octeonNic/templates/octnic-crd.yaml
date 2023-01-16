@@ -1,0 +1,23 @@
+apiVersion: acclr.github.com/v1beta1
+kind: OctNicUpdater
+metadata:
+  name: generic
+  namespace: {{.Release.Namespace}}
+spec:
+  acclr: "f95o"
+  fwimage: "uboot.img"
+  nodename: "controller-1"
+  operation: "run"
+  osimage: "rootfs.img"
+  pciAddr: "0000:af:00.0"
+  numvfs: "7"
+  resourcePrefix: "marvell.com"
+  resourceName:
+    - "marvell_sriov_net_vamp#0-3,vfio-pci"
+    - "marvell_sriov_net_rmp#4,5-6,Octeon_vf"
+
+   # - "marvell_sriov_net_vamp#0,vfio-pci"
+   # - "marvell_sriov_net_rmp#8-15"
+   # - "marvell_sriov_net_dip#20-21"
+   # - "marvell_sriov_net_dpp#32,36-37,40-47"
+

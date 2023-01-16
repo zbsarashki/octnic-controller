@@ -1,0 +1,8 @@
+apiVersion: v2
+name: octnic
+description: octnic chart
+type: application
+version: 0.0.1
+appVersion: 1.16.0
+#sources:
+#home:
