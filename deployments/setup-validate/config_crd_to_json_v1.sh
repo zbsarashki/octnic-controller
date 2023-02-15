@@ -64,6 +64,8 @@ echo "Resource count $i ${resources[$i]}"
 		firstVF=$(echo $v | sed -e 's/\(.*\)-.*/\1/g')
 		lastVF=$(echo $v | sed -e 's/.*-\(.*\)/\1/g')
 		seq $firstVF $lastVF
+	else
+		echo $v
     	fi
 	done
 	)
